@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>退订确认 · BAAI-CFTS</title>
+<style>
+  :root {
+    --brand-dark: #17140f;
+    --brand-orange: #e2603a;
+    --bg: #f7f4ee;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    background: var(--bg);
+    color: #222;
+  }
+  .header {
+    background: var(--brand-dark);
+    color: #fff;
+    padding: 24px 32px;
+  }
+  .header h1 { margin: 0 0 6px 0; font-size: 20px; letter-spacing: 1px; }
+  .header .sub { color: var(--brand-orange); font-size: 12px; letter-spacing: 2px; }
+  .container {
+    max-width: 640px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px 36px 40px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .container p.lead { font-size: 15px; line-height: 1.7; color: #333; }
+  .email-box {
+    background: var(--bg);
+    border: 1px solid #e6e0d4;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-weight: 600;
+    margin: 16px 0 24px;
+    word-break: break-all;
+  }
+  fieldset { border: none; padding: 0; margin: 0 0 20px; }
+  legend { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #17140f; }
+  label.reason {
+    display: block;
+    font-size: 14px;
+    padding: 8px 0;
+    color: #333;
+    cursor: pointer;
+  }
+  label.reason input { margin-right: 8px; }
+  textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid #ddd6c6;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .privacy-note {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.6;
+    margin: 16px 0 24px;
+  }
+  button#submitBtn {
+    background: var(--brand-orange);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  button#submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+  button#submitBtn:hover:not(:disabled) { opacity: 0.9; }
+  #errorMsg {
+    display: none;
+    margin-top: 16px;
+    color: #c0392b;
+    font-size: 13px;
+    background: #fdecea;
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  #successView {
+    display: none;
+    text-align: center;
+    padding: 20px 0 10px;
+  }
+  #successView .icon {
+    font-size: 48px;
+    color: #2e9e5b;
+    margin-bottom: 12px;
+  }
+  #successView h2 { margin: 0 0 10px; font-size: 18px; color: #17140f; }
+  #successView p { color: #555; font-size: 14px; line-height: 1.7; }
+  #formView.hidden, #successView.hidden { display: none; }
+  #successView.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>BAAI · CFTS</h1>
+  <div class="sub">UNSUBSCRIBE / VOL 001</div>
+</div>
+
+<div class="container">
+
+  <div id="formView">
+    <p class="lead">很遗憾您想要离开，我们希望改进服务。请确认以下邮箱将不再接收我们的邮件通知：</p>
+    <div class="email-box" id="emailDisplay">{{ email }}</div>
+
+    <fieldset>
+      <legend>可以告诉我们退订的原因吗？（可多选，非必填）</legend>
+      <label class="reason"><input type="checkbox" name="reason" value="内容不感兴趣"> 内容不感兴趣</label>
+      <label class="reason"><input type="checkbox" name="reason" value="邮件太频繁"> 暂时与我无关，未来会关注</label>
+      <label class="reason"><input type="checkbox" name="reason" value="邮件与我无关"> 内容质量低</label>
+      <label class="reason"><input type="checkbox" name="reason" value="其他"> 其他</label>
+    </fieldset>
+
+    <textarea id="otherText" placeholder="其他补充说明（选填）"></textarea>
+
+    <p class="privacy-note">
+      以上信息仅用于精准标注退订学者身份，优化学术社群名单管理，不会用于其他用途。
+    </p>
+
+    <button id="submitBtn">确认退订</button>
+    <div id="errorMsg"></div>
+  </div>
+
+  <div id="successView">
+    <div class="icon">&#10003;</div>
+    <h2>退订成功</h2>
+    <p>您将不再收到来自 BAAI-CFTS 的邮件。感谢您的反馈，我们会持续改进。</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var email = params.get("email") || "{{ email }}";
+  var token = params.get("token") || "{{ token }}";
+  var cid = params.get("cid") || "{{ campaign_id }}";
+
+  var emailDisplay = document.getElementById("emailDisplay");
+  if (emailDisplay && email) emailDisplay.textContent = email;
+
+  var submitBtn = document.getElementById("submitBtn");
+  var errorMsg = document.getElementById("errorMsg");
+  var formView = document.getElementById("formView");
+  var successView = document.getElementById("successView");
+
+  function showError(text) {
+    errorMsg.textContent = text;
+    errorMsg.style.display = "block";
+  }
+
+  function showSuccess() {
+    formView.style.display = "none";
+    successView.style.display = "block";
+    successView.classList.add("visible");
+  }
+
+  submitBtn.addEventListener("click", function () {
+    errorMsg.style.display = "none";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "提交中...";
+
+    var reasons = Array.prototype.slice
+      .call(document.querySelectorAll('input[name="reason"]:checked'))
+      .map(function (el) { return el.value; });
+
+    var payload = {
+      email: email,
+      token: token,
+      cid: cid,
+      reasons: reasons,
+      other_text: document.getElementById("otherText").value || "",
+      user_agent: navigator.userAgent,
+      page_url: window.location.href
+    };
+
+    fetch("/api/unsubscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (result.ok && result.data && result.data.status === "ok") {
+          showSuccess();
+        } else {
+          var msg = (result.data && result.data.message) || "退订失败，请稍后重试或联系管理员。";
+          showError(msg);
+          submitBtn.disabled = false;
+          submitBtn.textContent = "确认退订";
+        }
+      })
+      .catch(function (err) {
+        showError("网络请求失败，请检查网络连接后重试。");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "确认退订";
+      });
+  });
+})();
+</script>
+
+</body>
+</html>
