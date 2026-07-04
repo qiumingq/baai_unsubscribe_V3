@@ -1,11 +1,11 @@
 #!/bin/bash
 # BAAI-CFTS 退订系统 一键部署脚本（Alibaba Cloud Linux / alinux 专用）
-# 用法：将本项目文件全部上传到 /opt/baai-unsubscribe 后，在该目录下执行：
+# 用法：将本项目文件全部上传到 /home/admin/baai_unsubscribe_V3 后，在该目录下执行：
 #   sudo bash deploy.sh
 
 set -e
 
-APP_DIR="/opt/baai-unsubscribe"
+APP_DIR="/home/admin/baai_unsubscribe_V3"
 cd "$APP_DIR"
 
 echo "[1/6] 安装系统依赖（python3, pip, nginx）..."
