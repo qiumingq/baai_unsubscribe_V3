@@ -190,7 +190,7 @@
       page_url: window.location.href
     };
 
-    fetch("/api/unsubscribe", {
+    fetch("api/unsubscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
