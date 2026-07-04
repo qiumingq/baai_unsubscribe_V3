@@ -8,25 +8,17 @@ set -e
 APP_DIR="/home/admin/baai_unsubscribe_V3"
 cd "$APP_DIR"
 
-echo "[1/6] 安装系统依赖（python3, pip, nginx）..."
-yum install -y python3 python3-pip nginx
 
-echo "[2/6] 创建虚拟环境..."
-python3 -m venv venv
-source venv/bin/activate
-
-echo "[3/6] 安装Python依赖..."
-pip install --upgrade pip
-pip install -r requirements.txt
+/usr/local/python3.10/bin/python3.10 -m pip install -r requirements.txt
 
 echo "[4/6] 配置 systemd 服务..."
-cp baai-unsubscribe.service /etc/systemd/system/baai-unsubscribe.service
+cp -r baai-unsubscribe.service /etc/systemd/system/baai-unsubscribe.service
 systemctl daemon-reload
 systemctl enable baai-unsubscribe
 systemctl restart baai-unsubscribe
 
 echo "[5/6] 配置 nginx 反向代理..."
-cp nginx_baai-unsubscribe.conf /etc/nginx/conf.d/baai-unsubscribe.conf
+cp -r nginx_baai-unsubscribe.conf /etc/nginx/conf.d/baai-unsubscribe.conf
 nginx -t
 systemctl enable nginx
 systemctl restart nginx
