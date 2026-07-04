@@ -1,3 +1,7 @@
+[Unit]
+Description=BAAI-CFTS Unsubscribe Flask App
+After=network.target
+
 [Service]
 User=root
 WorkingDirectory=/home/admin/baai_unsubscribe_V3
